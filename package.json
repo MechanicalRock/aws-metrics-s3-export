@@ -1,0 +1,90 @@
+{
+  "name": "@mechanicalrock/aws-metrics-s3-export",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "config": {
+    "region": "ap-southeast-2",
+    "staging_bucket": "mr-aws-metrics-s3-export-sar",
+    "stack_name": "aws-metrics-s3-export"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf .build",
+    "ci:upgrade-dependencies": "./upgrade-dependencies.sh",
+    "dependency:upgrade": "npm upgrade --latest",
+    "create-codebuild": "aws cloudformation create-stack --region ap-southeast-2 --stack-name aws-metrics-s3-export-codebuild --template-body file://codebuild.yml --capabilities CAPABILITY_NAMED_IAM ",
+    "update-codebuild": "aws cloudformation update-stack --region ap-southeast-2 --stack-name aws-metrics-s3-export-codebuild --template-body file://codebuild.yml --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=GitHubToken,UsePreviousValue=true",
+    "deploy:dev": "serverless deploy --stage dev",
+    "delete:dev": "serverless remove --stage dev",
+    "lint": "eslint .",
+    "lint-fix": "eslint . --fix",
+    "package": "sam package --template-file template.yml --s3-bucket ${npm_package_config_staging_bucket}-${npm_package_config_region} --output-template-file .out/packaged.yaml",
+    "preversion": "npm run build",
+    "prepublish": "npm run build",
+    "release": "npm run clean && npm version && npm run test && npm login && npm publish && npm run test:security-monitor && git push && git push --tags",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:it": "jest --config ./jest.integration.js",
+    "test:security": "snyk test",
+    "test:security-monitor": "snyk monitor"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:MechanicalRock/aws-metrics-s3-export.git"
+  },
+  "author": "Zainab Maleki <zainab.maleki@mechanicalrock.io>",
+  "contributors": [],
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/MechanicalRock/aws-metrics-s3-export/pulls"
+  },
+  "homepage": "https://github.com/MechanicalRock/aws-metrics-s3-export",
+  "dependencies": {
+    "aws-sdk": "^2.463.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.26",
+    "@types/jest": "^24.0.13",
+    "@types/mockdate": "^2.0.0",
+    "@types/node": "^10.1.2",
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "@typescript-eslint/parser": "^2.19.0",
+    "aws-sdk-mock": "^4.4.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "jest-cucumber": "^2.0.12",
+    "lambda-tester": "^4.0.1",
+    "sinon": "^7.5.0",
+    "sinon-chai": "^3.3.0",
+    "snyk": "^1.245.0",
+    "source-map-support": "^0.5.12",
+    "ts-jest": "^24.0.2",
+    "ts-loader": "^6.0.1",
+    "typescript": "^3.4.5",
+    "webpack": "^4.32.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": [
+        "./tsconfig.json",
+        "./tsconfig.test.json",
+        "./example/webpack.config.js",
+        "./jest.config.js",
+        "./jest.integration.js",
+        "./source-map-install.js",
+        "./webpack.config.js"
+      ]
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ]
+  }
+}
