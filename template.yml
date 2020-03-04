@@ -1,26 +1,21 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: 'Create service-health-metrics based on cloudwatch alarms.'
+Description: 'Creating a lambda to export a whitelist of cloudwatch metrics periodically and push them into s3.'
 
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: mechanicalrock-ops-metrics
-    Description: Creating service-health-metrics based on cloudwatch alarms.
+    Name: mechanicalrock-aws-metrics-s3-export
+    Description: Creating a lambda to export a whitelist of cloudwatch metrics periodically and push them into s3.
     Author: Mechanical Rock
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE
     ReadmeUrl: README.md
-    Labels: ['metrics', 'mttr', 'mtbf']
-    HomePageUrl: https://github.com/MechanicalRock/aws-ops-metrics
-    SemanticVersion: 1.5.0
-    SourceCodeUrl: https://github.com/MechanicalRock/aws-ops-metrics
+    Labels: ['metrics', 's3', 'export', 'mechanicalrock']
+    HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
-  AlarmNameBlackListPattern:
-    Description: 'a regex pattern which would be matched agains alarm name in order to blacklist it from generating health metrics. Default pattern is set to filter Dynamodb autoscaling alarms'
-    Type: String
-    # Below default regex pattern matches the auto generated alarm names created by dynamodb's auto scaling
-    Default: "(-AlarmHigh|-AlarmLow|-ProvisionedCapacityHigh|-ProvisionedCapacityLow)-(\\{){0,1}[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}(\\}){0,1}"
   PermissionsBoundary:
     Description: "An optional permissions boundary to apply to all roles"
     Type: String
@@ -47,152 +42,16 @@ Resources:
             Action: cloudwatch:DescribeAlarmHistory
             Resource: '*'
 
-  ListPipelinePolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Action: codepipeline:ListPipelines
-            Resource: '*'
-
   MTTREventHandler:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Description: Create CloudWatch mttr metric from cloudwatch alarm events
-      Handler: mttr.handler
+      Description: Export cloudwatch metrics and push them into s3
+      Handler: s3Export.handler
       Runtime: nodejs12.x
       CodeUri: .build/src
       Environment:
         Variables:
           ALARM_NAME_BLACKLIST_PATTERN: !Ref AlarmNameBlackListPattern
-      Events:
-        cloudwatchEvent:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              source:
-                - 'aws.cloudwatch'
-              detail-type:
-                - 'CloudWatch Alarm State Change'
-      Policies:
-        - CloudWatchPutMetricPolicy: {}
-        - !Ref DescribeAlarmPolicy
-      PermissionsBoundary:
-        !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
-
-  MTBFEventHandler:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Description: Create CloudWatch mtbf metric from cloudwatch alarm events
-      Handler: mtbf.handler
-      Runtime: nodejs12.x
-      CodeUri: .build/src
-      Environment:
-        Variables:
-          ALARM_NAME_BLACKLIST_PATTERN: !Ref AlarmNameBlackListPattern
-      Events:
-        cloudwatchEvent:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              source:
-                - 'aws.cloudwatch'
-              detail-type:
-                - 'CloudWatch Alarm State Change'
-      Policies:
-        - CloudWatchPutMetricPolicy: {}
-        - !Ref DescribeAlarmPolicy
-      PermissionsBoundary:
-        !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
-
-  MTTFEventHandler:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Description: Create CloudWatch mttf metric from cloudwatch alarm events
-      Handler: mttf.handler
-      Runtime: nodejs12.x
-      CodeUri: .build/src
-      Environment:
-        Variables:
-          ALARM_NAME_BLACKLIST_PATTERN: !Ref AlarmNameBlackListPattern
-      Events:
-        cloudwatchEvent:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              source:
-                - 'aws.cloudwatch'
-              detail-type:
-                - 'CloudWatch Alarm State Change'
-      Policies:
-        - CloudWatchPutMetricPolicy: {}
-        - !Ref DescribeAlarmPolicy
-      PermissionsBoundary:
-        !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
-
-  DynamoStreamHandler:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Description: Create CloudWatch mttf metric from cloudwatch alarm events
-      Handler: dynamoStream.handler
-      Runtime: nodejs12.x
-      CodeUri: .build/src
-      Environment:
-        Variables:
-          TABLE_NAME: MetricsEventStore
-      ReservedConcurrentExecutions: 1
-      Events:
-        DynamoDBStream:
-          Type: DynamoDB
-          Properties:
-            Stream:
-              'Fn::GetAtt':
-                - EventStoreDynamoTable
-                - StreamArn
-            StartingPosition: TRIM_HORIZON
-      Policies:
-        - CloudWatchPutMetricPolicy: {}
-        - DynamoDBCrudPolicy:
-            TableName: MetricsEventStore
-      PermissionsBoundary:
-        !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
-
-  StateChangeHandler:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Description: Capturing all cloudwatch alarm State changes in dynamo
-      Handler: stateChangeHandler.handler
-      Runtime: nodejs12.x
-      CodeUri: .build/src
-      Environment:
-        Variables:
-          TABLE_NAME: MetricsEventStore
-      Events:
-        cloudwatchEvent:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              source:
-                - 'aws.cloudwatch'
-              detail-type:
-                - 'CloudWatch Alarm State Change'
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: MetricsEventStore
-        - !Ref ListPipelinePolicy
-        - !Ref DescribeAlarmPolicy
-      PermissionsBoundary:
-        !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
-
-  OpsDashboardGenerator:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Description: Build OPS Trend dashboard from CloudWatch metrics
-      Handler: dashboardHandler.generateDashboardTrend
-      Runtime: nodejs12.x
-      CodeUri: .build/src
       Timeout: 60
       Events:
         DashboardEventRule:
@@ -200,47 +59,7 @@ Resources:
           Properties:
             Schedule: 'cron(*/5 * * * ? *)'
       Policies:
-        - CloudWatchDashboardPolicy: {}
+        - CloudWatchPutMetricPolicy: {}
+        - !Ref DescribeAlarmPolicy
       PermissionsBoundary:
         !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
-
-  EventStoreDynamoTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: MetricsEventStore
-      BillingMode: PAY_PER_REQUEST
-      SSESpecification:
-        SSEEnabled: true
-      AttributeDefinitions:
-        - AttributeName: 'id'
-          AttributeType: 'S'
-        - AttributeName: 'resourceId'
-          AttributeType: 'S'
-        - AttributeName: 'pipelineName'
-          AttributeType: 'S'
-        - AttributeName: 'bookmarked'
-          AttributeType: 'S'
-      KeySchema:
-        - AttributeName: 'id'
-          KeyType: HASH
-        - AttributeName: 'resourceId'
-          KeyType: 'RANGE'
-      StreamSpecification:
-        StreamViewType: NEW_AND_OLD_IMAGES
-      GlobalSecondaryIndexes:
-        - IndexName: 'resourceId-id-index'
-          KeySchema:
-            - AttributeName: 'resourceId'
-              KeyType: HASH
-            - AttributeName: 'id'
-              KeyType: RANGE
-          Projection:
-            ProjectionType: 'ALL'
-        - IndexName: 'pipelineName-index'
-          KeySchema:
-            - AttributeName: 'pipelineName'
-              KeyType: HASH
-            - AttributeName: 'bookmarked'
-              KeyType: RANGE
-          Projection:
-            ProjectionType: 'ALL'

@@ -2,7 +2,7 @@
   "name": "@mechanicalrock/aws-metrics-s3-export",
   "version": "1.0.0",
   "description": "",
-  "main": "build/index.js",
+  "main": "build/src/s3Export.js",
   "config": {
     "region": "ap-southeast-2",
     "staging_bucket": "mr-aws-metrics-s3-export-sar",
