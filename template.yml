@@ -17,19 +17,14 @@ Metadata:
 
 Parameters:
   PermissionsBoundary:
-    Description: "An optional permissions boundary to apply to all roles"
+    Description: 'An optional permissions boundary to apply to all roles'
     Type: String
     ConstraintDescription: Must match a valid ARN of an IAM policy for the permission boundary
     AllowedPattern: "^$|arn:aws:iam::\\d{12}:policy/[a-zA-Z\\-]+$"
-    Default: ""
-  SanitisePattern:
-    Description: 'comma delimited list of patterns to use to sanitise pipeline names.  Strips the pipeline name to characters before the matching patter.  Example pipeline with name "foo-pipeline123" and sanitise pattern "-pipeline" will be reported as "foo"'
-    Type: CommaDelimitedList
-    Default: "-pipeline"
-    AllowedPattern: [a-zA-Z_\\-]+(,[a-zA-Z_\\-]+)*
+    Default: ''
 
 Conditions:
-  HasPermissionBoundary: !Not [!Equals [!Ref PermissionsBoundary, ""]]
+  HasPermissionBoundary: !Not [!Equals [!Ref PermissionsBoundary, '']]
 
 Resources:
   DescribeAlarmPolicy:
@@ -42,7 +37,7 @@ Resources:
             Action: cloudwatch:DescribeAlarmHistory
             Resource: '*'
 
-  MTTREventHandler:
+  S3ExportHandler:
     Type: 'AWS::Serverless::Function'
     Properties:
       Description: Export cloudwatch metrics and push them into s3
@@ -61,5 +56,12 @@ Resources:
       Policies:
         - CloudWatchPutMetricPolicy: {}
         - !Ref DescribeAlarmPolicy
-      PermissionsBoundary:
-        !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
+      PermissionsBoundary: !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
+
+  PreviousMetricsExportEndDate:
+    Type: 'AWS::SSM::Parameter'
+    Properties:
+      Type: String
+      Value: 'Undefined'
+      Description: A parameter to store previous metrics exported end date
+      Name: /metrics/previous-export-end-date
