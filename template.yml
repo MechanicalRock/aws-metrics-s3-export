@@ -44,9 +44,9 @@ Resources:
       Handler: s3Export.handler
       Runtime: nodejs12.x
       CodeUri: .build/src
-      Environment:
-        Variables:
-          ALARM_NAME_BLACKLIST_PATTERN: !Ref AlarmNameBlackListPattern
+      # Environment:
+      #   Variables:
+      #     ALARM_NAME_BLACKLIST_PATTERN: !Ref AlarmNameBlackListPattern
       Timeout: 60
       Events:
         DashboardEventRule:
