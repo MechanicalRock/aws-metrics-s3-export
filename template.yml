@@ -76,7 +76,7 @@ Resources:
                 - ssm:GetParameter
                 - ssm:PutParameters
               Resource:
-                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/metrics/*
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/metrics/*'
 
   S3ExportHandler:
     Type: 'AWS::Serverless::Function'
