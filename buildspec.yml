@@ -11,7 +11,7 @@ phases:
   build:
     commands:
       - npm run build
-      - npm test
+      # - npm test
       - sam --version
       - mkdir .out
       - sam package --template-file template.yml --s3-bucket ${STAGING_BUCKET_PREFIX}-${AWS_REGION} --output-template-file .out/packaged.yaml

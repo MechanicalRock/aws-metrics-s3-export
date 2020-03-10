@@ -8,31 +8,36 @@ config.update({ region: 'ap-southeast-2' });
 
 export async function handler(event: ScheduledEvent): Promise<void> {
   console.log('Event is: ', event);
-  const ssm = new SSM();
-  const s3 = new S3();
-  if (process.env.METRICSFILTER) {
-    console.log('process.env.METRICSFILTER: ', process.env.METRICSFILTER);
-    const metrics = JSON.parse(process.env.METRICSFILTER);
-    const startTime = await retrieveStartTime(ssm);
-    const endTime = new Date();
-    const cw = new CloudWatch();
-    const period = 3600;
+  try {
+    const ssm = new SSM();
+    const s3 = new S3();
+    if (process.env.METRICSFILTER) {
+      console.log('process.env.METRICSFILTER: ', process.env.METRICSFILTER);
+      const metrics = JSON.parse(process.env.METRICSFILTER);
+      const startTime = await retrieveStartTime(ssm);
+      const endTime = new Date();
+      const cw = new CloudWatch();
+      const period = 3600;
 
-    for (let i = 0; i < metrics.length; i++) {
-      const metricData = await getMetricsData(
-        cw,
-        metrics[i].metricName,
-        metrics[i].nameSpace,
-        startTime,
-        endTime,
-        period,
-      );
-      await storeResultInS3(s3, metrics[i].metricName, metrics[i].nameSpace, JSON.stringify(metricData), event);
-      console.log('Start Time is:', startTime);
+      for (let i = 0; i < metrics.length; i++) {
+        const metricData = await getMetricsData(
+          cw,
+          metrics[i].metricName,
+          metrics[i].nameSpace,
+          startTime,
+          endTime,
+          period,
+        );
+        await storeResultInS3(s3, metrics[i].metricName, metrics[i].nameSpace, JSON.stringify(metricData), event);
+        console.log('Start Time is:', startTime);
+      }
+
+      await storeEndTime(ssm, endTime.toString());
+      console.log('End Time is:', endTime);
     }
-
-    await storeEndTime(ssm, endTime.toString());
-    console.log('End Time is:', endTime);
+  } catch (e) {
+    console.log('There was an error: ', e);
+    throw e;
   }
 }
 

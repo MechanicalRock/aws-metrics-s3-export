@@ -41,15 +41,42 @@ Conditions:
   HasPermissionBoundary: !Not [!Equals [!Ref PermissionsBoundary, '']]
 
 Resources:
-  DescribeAlarmPolicy:
+  GetMetricsStatisticsPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
-            Action: cloudwatch:DescribeAlarmHistory
+            Action: cloudwatch:GetMetricStatistics
             Resource: '*'
+
+  S3ReadWritePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource:
+              - !Sub arn:aws:s3:::${ExportBucketName}
+              - !Sub arn:aws:s3:::${ExportBucketName}/*
+
+    SsmAccessPolicy:
+      Type: AWS::IAM::ManagedPolicy
+      Properties:
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:PutParameters
+              Resource:
+                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/metrics/*
 
   S3ExportHandler:
     Type: 'AWS::Serverless::Function'
@@ -71,8 +98,9 @@ Resources:
           Properties:
             Schedule: 'cron(*/5 * * * ? *)'
       Policies:
-        - CloudWatchPutMetricPolicy: {}
-        - !Ref DescribeAlarmPolicy
+        - !Ref GetMetricsStatisticsPolicy
+        - !Ref S3ReadWritePolicy
+        - !Ref SsmAccessPolicy
       PermissionsBoundary: !If [HasPermissionBoundary, !Ref PermissionsBoundary, !Ref AWS::NoValue]
 
   PreviousMetricsExportEndDate:
