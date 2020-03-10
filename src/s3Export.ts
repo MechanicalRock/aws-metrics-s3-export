@@ -27,7 +27,7 @@ export async function handler(event: ScheduledEvent): Promise<void> {
         endTime,
         period,
       );
-      await storeResultInS3(s3, metrics[i].metricName, metrics[i].nameSpace, JSON.stringify(metricData));
+      await storeResultInS3(s3, metrics[i].metricName, metrics[i].nameSpace, JSON.stringify(metricData), event);
       console.log('Start Time is:', startTime);
     }
 
@@ -94,11 +94,19 @@ export async function getMetricsData(
   return result;
 }
 
-export async function storeResultInS3(s3: S3, metricName: string, nameSpace: string, metricsData: any): Promise<void> {
+export async function storeResultInS3(
+  s3: S3,
+  metricName: string,
+  nameSpace: string,
+  metricsData: any,
+  event: ScheduledEvent,
+): Promise<void> {
   if (process.env.EXPORTBUCKETNAME) {
     const params: S3.PutObjectRequest = {
       Bucket: process.env.EXPORTBUCKETNAME,
-      Key: `${nameSpace}-${metricName}/${new Date().getTime()}`,
+      Key: `CloudWatchMetrics/acc=${event.account}/reg=${
+        config.region
+      }/${nameSpace}-${metricName}/y=${new Date().getFullYear()}/${new Date().getTime()}.json`,
       Body: metricsData,
     };
     const result = await s3.putObject(params).promise();
