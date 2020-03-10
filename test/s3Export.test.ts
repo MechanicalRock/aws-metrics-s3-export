@@ -14,6 +14,10 @@ describe('dynamoStream', () => {
   };
   beforeEach(async () => {
     console.log('Hello World');
+    process.env.SSMPARAMETERNAME = '/metrics/previous-export-end-date';
+    process.env.EXPORTBUCKETNAME = 'z-bucket-test-export';
+    process.env.METRICSFILTER =
+      '[{ "metricName" : "ConcurrentExecutions", "nameSpace" : "Lambda"}, { "metricName" : "IncomingBytes", "nameSpace" : "Logs"}]';
   });
 
   afterEach(() => {
@@ -21,6 +25,19 @@ describe('dynamoStream', () => {
   });
 
   it('should calculate the total score when there is a previouse score stored in dynamo', async () => {
+    process.env.PRIOD = 'MONTHLY';
+    await handler(cloudwatchMockEvent);
+    expect(true).toBe(true);
+  });
+
+  it('should calculate the total score when there is a previouse score stored in dynamo', async () => {
+    process.env.PRIOD = 'FORTNIGHLY';
+    await handler(cloudwatchMockEvent);
+    expect(true).toBe(true);
+  });
+
+  it('should calculate the total score when there is a previouse score stored in dynamo', async () => {
+    process.env.PRIOD = 'WEEKLY';
     await handler(cloudwatchMockEvent);
     expect(true).toBe(true);
   });

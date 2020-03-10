@@ -1,6 +1,6 @@
 {
   "name": "@mechanicalrock/aws-metrics-s3-export",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "build/src/s3Export.js",
   "config": {
@@ -56,6 +56,7 @@
     "eslint": "^6.8.0",
     "jest-cucumber": "^2.0.12",
     "lambda-tester": "^4.0.1",
+    "moment": "^2.24.0",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
     "snyk": "^1.245.0",

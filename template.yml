@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['metrics', 's3', 'export', 'mechanicalrock']
     HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
-    SemanticVersion: 1.0.0
+    SemanticVersion: 1.0.1
     SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
@@ -22,6 +22,20 @@ Parameters:
     ConstraintDescription: Must match a valid ARN of an IAM policy for the permission boundary
     AllowedPattern: "^$|arn:aws:iam::\\d{12}:policy/[a-zA-Z\\-]+$"
     Default: ''
+  MetricFilter:
+    Description: 'An array of metrics names and namespaces that needs to be exported to s3'
+    Type: String
+    ConstraintDescription: 'The array should look like [{ "metricName" : "ConcurrentExecutions", "nameSpace" : "Lambda"}, { "metricName" : "IncomingBytes", "nameSpace" : "Logs"}]'
+  ExportBucketName:
+    Description: 'BucketName where the metrics result will be exported to'
+    Type: String
+  MetricsExportPriod:
+    Description: 'Metrics export priod, WEEKLY, FORTNIGHTLY, MOTHLY'
+    Type: String
+    AllowedValues:
+      - WEEKLY
+      - FORTNIGHTLY
+      - MOTHLY
 
 Conditions:
   HasPermissionBoundary: !Not [!Equals [!Ref PermissionsBoundary, '']]
@@ -44,9 +58,12 @@ Resources:
       Handler: s3Export.handler
       Runtime: nodejs12.x
       CodeUri: .build/src
-      # Environment:
-      #   Variables:
-      #     ALARM_NAME_BLACKLIST_PATTERN: !Ref AlarmNameBlackListPattern
+      Environment:
+        Variables:
+          METRICSFILTER: !Ref MetricFilter
+          EXPORTBUCKETNAME: !Ref ExportBucketName
+          SSMPARAMETERNAME: !Ref PreviousMetricsExportEndDate
+          METRICSEXPORTPRIOD: !Ref MetricsExportPriod
       Timeout: 60
       Events:
         DashboardEventRule:
