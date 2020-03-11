@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['metrics', 's3', 'export', 'mechanicalrock']
     HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
-    SemanticVersion: 1.0.1
+    SemanticVersion: 1.0.2
     SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
@@ -91,12 +91,12 @@ Resources:
           EXPORTBUCKETNAME: !Ref ExportBucketName
           SSMPARAMETERNAME: !Ref PreviousMetricsExportEndDate
           METRICSEXPORTPRIOD: !Ref MetricsExportPriod
-      Timeout: 60
+      Timeout: 900
       Events:
         DashboardEventRule:
           Type: Schedule
           Properties:
-            Schedule: 'cron(*/5 * * * ? *)'
+            Schedule: 'rate(7 days)'
       Policies:
         - !Ref GetMetricsStatisticsPolicy
         - !Ref S3ReadWritePolicy
