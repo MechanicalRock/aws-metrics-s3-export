@@ -8,16 +8,16 @@
     "esModuleInterop": true,
     "allowJs": true,
     "target": "es2017",
-    "outDir": ".build",
     "moduleResolution": "node",
     "lib": [
       "es2017"
-    ],
-    "rootDir": "./"
+    ]
   },
   "include": [
     "src",
-    "test"
+    "test",
+    "src/*.ts",
+    "src/*.js"
   ],
   "exclude": [
     "./node_modules"

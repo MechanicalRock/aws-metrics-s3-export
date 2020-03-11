@@ -92,9 +92,9 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Description: Export cloudwatch metrics and push them into s3
-      Handler: s3Export.handler
+      Handler: src/s3Export.handler
       Runtime: nodejs12.x
-      CodeUri: .build/src
+      CodeUri: ./
       Environment:
         Variables:
           METRICSFILTER: !Ref MetricFilter
