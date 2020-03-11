@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['metrics', 's3', 'export', 'mechanicalrock']
     HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
-    SemanticVersion: 1.0.2
+    SemanticVersion: 1.0.3
     SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
@@ -30,15 +30,21 @@ Parameters:
     Description: 'BucketName where the metrics result will be exported to'
     Type: String
   MetricsExportPriod:
-    Description: 'Metrics export priod, WEEKLY, FORTNIGHTLY, MOTHLY'
+    Description: 'Metrics export priod, WEEKLY, FORTNIGHTLY, MONTHLY'
     Type: String
     AllowedValues:
       - WEEKLY
       - FORTNIGHTLY
-      - MOTHLY
+      - MONTHLY
 
 Conditions:
   HasPermissionBoundary: !Not [!Equals [!Ref PermissionsBoundary, '']]
+
+Mappings:
+  ExportPeriod:
+    WEEKLY: 'rate(7 days)'
+    FORTNIGHTLY: 'rate(14 days)'
+    MONTHLY: 'rate(30 days)'
 
 Resources:
   GetMetricsStatisticsPolicy:
@@ -96,7 +102,7 @@ Resources:
         DashboardEventRule:
           Type: Schedule
           Properties:
-            Schedule: 'rate(7 days)'
+            Schedule: !FindInMap [ExportPeriod, !Ref MetricsExportPriod]
       Policies:
         - !Ref GetMetricsStatisticsPolicy
         - !Ref S3ReadWritePolicy

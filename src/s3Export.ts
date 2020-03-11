@@ -15,16 +15,15 @@ export async function handler(event: ScheduledEvent): Promise<void> {
       console.log('process.env.METRICSFILTER: ', process.env.METRICSFILTER);
       const metrics = JSON.parse(process.env.METRICSFILTER);
       const startTime = await retrieveStartTime(ssm);
+      console.log('Start Time is:', startTime);
       const endTime = new Date();
+      console.log('End Time is:', endTime);
       const cw = new CloudWatch();
       const period = 3600;
 
       const metricData = await getMetricsData(cw, startTime, endTime, period, metrics);
       await storeResultInS3(s3, metricData, event);
-      console.log('Start Time is:', startTime);
-
       await storeEndTime(ssm, endTime.toString());
-      console.log('End Time is:', endTime);
     }
   } catch (e) {
     console.log('There was an error: ', e);
@@ -127,12 +126,12 @@ export async function storeResultInS3(
 
 export async function storeEndTime(ssm: SSM, endTime: string): Promise<void> {
   if (process.env.SSMPARAMETERNAME) {
-    // const param: SSM.PutParameterRequest = {
-    //   Name: process.env.SSMPARAMETERNAME,
-    //   Value: endTime,
-    //   Type: 'String',
-    //   Overwrite: true,
-    // };
-    // await ssm.putParameter(param).promise();
+    const param: SSM.PutParameterRequest = {
+      Name: process.env.SSMPARAMETERNAME,
+      Value: endTime,
+      Type: 'String',
+      Overwrite: true,
+    };
+    await ssm.putParameter(param).promise();
   }
 }
