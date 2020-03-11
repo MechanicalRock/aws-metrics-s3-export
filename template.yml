@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['metrics', 's3', 'export', 'mechanicalrock']
     HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
-    SemanticVersion: 1.0.3
+    SemanticVersion: 1.0.4
     SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
@@ -32,6 +32,7 @@ Parameters:
   MetricsExportPriod:
     Description: 'Metrics export priod, WEEKLY, FORTNIGHTLY, MONTHLY'
     Type: String
+    Default: 'WEEKLY'
     AllowedValues:
       - WEEKLY
       - FORTNIGHTLY

@@ -1,6 +1,6 @@
 {
   "name": "@mechanicalrock/aws-metrics-s3-export",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "build/src/s3Export.js",
   "config": {
@@ -42,7 +42,8 @@
   },
   "homepage": "https://github.com/MechanicalRock/aws-metrics-s3-export",
   "dependencies": {
-    "aws-sdk": "^2.463.0"
+    "aws-sdk": "^2.463.0",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.26",
@@ -52,13 +53,7 @@
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
     "aws-sdk-mock": "^4.4.0",
-    "chai": "^4.2.0",
     "eslint": "^6.8.0",
-    "jest-cucumber": "^2.0.12",
-    "lambda-tester": "^4.0.1",
-    "moment": "^2.24.0",
-    "sinon": "^7.5.0",
-    "sinon-chai": "^3.3.0",
     "snyk": "^1.245.0",
     "source-map-support": "^0.5.12",
     "ts-jest": "^24.0.2",
