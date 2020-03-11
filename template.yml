@@ -48,7 +48,7 @@ Resources:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
-            Action: cloudwatch:GetMetricStatistics
+            Action: cloudwatch:GetMetricData
             Resource: '*'
 
   S3ReadWritePolicy:
@@ -65,18 +65,18 @@ Resources:
               - !Sub arn:aws:s3:::${ExportBucketName}
               - !Sub arn:aws:s3:::${ExportBucketName}/*
 
-    SsmAccessPolicy:
-      Type: AWS::IAM::ManagedPolicy
-      Properties:
-        PolicyDocument:
-          Version: 2012-10-17
-          Statement:
-            - Effect: Allow
-              Action:
-                - ssm:GetParameter
-                - ssm:PutParameters
-              Resource:
-                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/metrics/previous-export-end-date'
+  SsmAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:PutParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/metrics/previous-export-end-date'
 
   S3ExportHandler:
     Type: 'AWS::Serverless::Function'
