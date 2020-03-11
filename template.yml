@@ -42,9 +42,12 @@ Conditions:
 
 Mappings:
   ExportPeriod:
-    WEEKLY: 'rate(7 days)'
-    FORTNIGHTLY: 'rate(14 days)'
-    MONTHLY: 'rate(30 days)'
+    WEEKLY:
+      Rate: 'rate(7 days)'
+    FORTNIGHTLY:
+      Rate: 'rate(14 days)'
+    MONTHLY:
+      Rate: 'rate(30 days)'
 
 Resources:
   GetMetricsStatisticsPolicy:
@@ -102,7 +105,7 @@ Resources:
         DashboardEventRule:
           Type: Schedule
           Properties:
-            Schedule: !FindInMap [ExportPeriod, !Ref MetricsExportPriod]
+            Schedule: !FindInMap [ExportPeriod, !Ref MetricsExportPriod, Rate]
       Policies:
         - !Ref GetMetricsStatisticsPolicy
         - !Ref S3ReadWritePolicy
