@@ -19,18 +19,9 @@ export async function handler(event: ScheduledEvent): Promise<void> {
       const cw = new CloudWatch();
       const period = 3600;
 
-      for (let i = 0; i < metrics.length; i++) {
-        const metricData = await getMetricsData(
-          cw,
-          metrics[i].metricName,
-          metrics[i].nameSpace,
-          startTime,
-          endTime,
-          period,
-        );
-        await storeResultInS3(s3, metrics[i].metricName, metrics[i].nameSpace, JSON.stringify(metricData), event);
-        console.log('Start Time is:', startTime);
-      }
+      const metricData = await getMetricsData(cw, startTime, endTime, period, metrics);
+      await storeResultInS3(s3, metricData, event);
+      console.log('Start Time is:', startTime);
 
       await storeEndTime(ssm, endTime.toString());
       console.log('End Time is:', endTime);
@@ -80,30 +71,43 @@ export async function retrieveStartTime(ssm: SSM): Promise<Date> {
 
 export async function getMetricsData(
   cloudwatch: CloudWatch,
-  metricName: string,
-  nameSpace: string,
   startTime: Date,
   endTime: Date,
   period: number,
-): Promise<CloudWatch.GetMetricStatisticsOutput> {
-  const x: CloudWatch.GetMetricStatisticsInput = {
-    MetricName: metricName,
-    Namespace: nameSpace,
-    Period: period,
-    StartTime: new Date(startTime),
+  metrics: any,
+): Promise<CloudWatch.GetMetricDataOutput> {
+  const param: CloudWatch.GetMetricDataInput = {
+    StartTime: startTime,
     EndTime: endTime,
-    Statistics: ['Average'],
+    MetricDataQueries: constructGetMetricsQuery(period, metrics),
   };
-  const result = await cloudwatch.getMetricStatistics(x).promise();
+  const result = await cloudwatch.getMetricData(param).promise();
   console.log('Get metric result is: ', JSON.stringify(result));
   return result;
 }
 
+export function constructGetMetricsQuery(period, metrics): CloudWatch.MetricDataQueries {
+  const metricQuery: CloudWatch.MetricDataQueries = [];
+  metrics.forEach((metric, i) => {
+    metricQuery.push({
+      Id: `m${i}`,
+      MetricStat: {
+        Metric: {
+          MetricName: metric.metricName,
+          Namespace: metric.nameSpace,
+        },
+        Period: period,
+        Stat: 'Average',
+      },
+    });
+  });
+  console.log('constructed query is: ', metricQuery);
+  return metricQuery;
+}
+
 export async function storeResultInS3(
   s3: S3,
-  metricName: string,
-  nameSpace: string,
-  metricsData: any,
+  metricsData: CloudWatch.GetMetricDataOutput,
   event: ScheduledEvent,
 ): Promise<void> {
   if (process.env.EXPORTBUCKETNAME) {
@@ -111,8 +115,8 @@ export async function storeResultInS3(
       Bucket: process.env.EXPORTBUCKETNAME,
       Key: `CloudWatchMetrics/acc=${event.account}/reg=${
         config.region
-      }/${nameSpace}-${metricName}/y=${new Date().getFullYear()}/${new Date().getTime()}.json`,
-      Body: metricsData,
+      }/y=${new Date().getFullYear()}/${new Date().getTime()}.json`,
+      Body: JSON.stringify(metricsData),
     };
     const result = await s3.putObject(params).promise();
     console.log('S3 put object result is: ', JSON.stringify(result));
@@ -123,12 +127,12 @@ export async function storeResultInS3(
 
 export async function storeEndTime(ssm: SSM, endTime: string): Promise<void> {
   if (process.env.SSMPARAMETERNAME) {
-    const param: SSM.PutParameterRequest = {
-      Name: process.env.SSMPARAMETERNAME,
-      Value: endTime,
-      Type: 'String',
-      Overwrite: true,
-    };
-    await ssm.putParameter(param).promise();
+    // const param: SSM.PutParameterRequest = {
+    //   Name: process.env.SSMPARAMETERNAME,
+    //   Value: endTime,
+    //   Type: 'String',
+    //   Overwrite: true,
+    // };
+    // await ssm.putParameter(param).promise();
   }
 }

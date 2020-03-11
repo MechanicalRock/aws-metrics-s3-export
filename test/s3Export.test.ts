@@ -17,7 +17,7 @@ describe('dynamoStream', () => {
     process.env.SSMPARAMETERNAME = '/metrics/previous-export-end-date';
     process.env.EXPORTBUCKETNAME = 'z-bucket-test-export';
     process.env.METRICSFILTER =
-      '[{ "metricName" : "ConcurrentExecutions", "nameSpace" : "Lambda"}, { "metricName" : "IncomingBytes", "nameSpace" : "Logs"}]';
+      '[{ "metricName" : "ConcurrentExecutions", "nameSpace" : "AWS/Lambda"}, { "metricName" : "IncomingBytes", "nameSpace" : "AWS/Logs"}]';
   });
 
   afterEach(() => {
