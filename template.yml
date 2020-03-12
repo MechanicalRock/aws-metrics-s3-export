@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['metrics', 's3', 'export', 'mechanicalrock']
     HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
-    SemanticVersion: 1.0.6
+    SemanticVersion: 1.0.7
     SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
@@ -92,9 +92,9 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Description: Export cloudwatch metrics and push them into s3
-      Handler: s3Export.handler
+      Handler: src/s3Export.handler
       Runtime: nodejs12.x
-      CodeUri: .build/src
+      CodeUri: .build
       Environment:
         Variables:
           METRICSFILTER: !Ref MetricFilter
