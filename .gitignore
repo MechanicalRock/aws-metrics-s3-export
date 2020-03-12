@@ -2,5 +2,3 @@
 .build
 coverage/
 .out
-.aws-sam/build
-.vscode
