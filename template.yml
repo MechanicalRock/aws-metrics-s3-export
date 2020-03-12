@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['metrics', 's3', 'export', 'mechanicalrock']
     HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.8
     SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
@@ -84,7 +84,7 @@ Resources:
           - Effect: Allow
             Action:
               - ssm:GetParameter
-              - ssm:PutParameters
+              - ssm:PutParameter
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/metrics/previous-export-end-date'
 
