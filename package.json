@@ -1,6 +1,6 @@
 {
   "name": "@mechanicalrock/aws-metrics-s3-export",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "main": "build/src/s3Export.js",
   "config": {
@@ -54,6 +54,7 @@
     "@typescript-eslint/parser": "^2.19.0",
     "aws-sdk-mock": "^4.4.0",
     "eslint": "^6.8.0",
+    "jest": "^25.1.0",
     "snyk": "^1.245.0",
     "source-map-support": "^0.5.12",
     "ts-jest": "^24.0.2",

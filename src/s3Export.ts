@@ -116,6 +116,7 @@ export async function storeResultInS3(
         config.region
       }/y=${new Date().getFullYear()}/${new Date().getTime()}.json`,
       Body: JSON.stringify(metricsData),
+      ACL: 'bucket-owner-full-control'
     };
     const result = await s3.putObject(params).promise();
     console.log('S3 put object result is: ', JSON.stringify(result));
