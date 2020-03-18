@@ -1,6 +1,6 @@
 {
   "name": "@mechanicalrock/aws-metrics-s3-export",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "",
   "main": "build/src/s3Export.js",
   "config": {
