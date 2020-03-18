@@ -71,6 +71,7 @@ Resources:
             Action:
               - s3:GetObject
               - s3:PutObject
+              - s3:PutObjectAcl
             Resource:
               - !Sub arn:aws:s3:::${ExportBucketName}
               - !Sub arn:aws:s3:::${ExportBucketName}/*
