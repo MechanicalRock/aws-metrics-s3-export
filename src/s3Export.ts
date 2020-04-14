@@ -94,13 +94,15 @@ export function constructGetMetricsQuery(period, metrics): CloudWatch.MetricData
         Metric: {
           MetricName: metric.metricName,
           Namespace: metric.nameSpace,
+
+          Dimensions: metric.dimension.map(d => { return { Name: d.name, Value: d.value }})
         },
         Period: period,
         Stat: 'Average',
       },
     });
   });
-  console.log('constructed query is: ', metricQuery);
+  console.log('constructed query is: ', JSON.stringify(metricQuery));
   return metricQuery;
 }
 
