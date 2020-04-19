@@ -6,6 +6,19 @@ const moment = require('moment');
 
 config.update({ region: 'ap-southeast-2' });
 
+type MetricFilters = MetricFilter[]
+
+interface MetricFilter {
+  metricName: string,
+  nameSpace: string,
+  dimensions?: MetricFilterDimension[]
+}
+
+interface MetricFilterDimension {
+  name: string,
+  value: string
+}
+
 export async function handler(event: ScheduledEvent): Promise<void> {
   console.log('Event is: ', event);
   try {
@@ -73,7 +86,7 @@ export async function getMetricsData(
   startTime: Date,
   endTime: Date,
   period: number,
-  metrics: any,
+  metrics: MetricFilters,
 ): Promise<CloudWatch.GetMetricDataOutput> {
   const param: CloudWatch.GetMetricDataInput = {
     StartTime: startTime,
@@ -85,9 +98,13 @@ export async function getMetricsData(
   return result;
 }
 
-export function constructGetMetricsQuery(period, metrics): CloudWatch.MetricDataQueries {
+export function constructGetMetricsQuery(period: number, metrics): CloudWatch.MetricDataQueries {
   const metricQuery: CloudWatch.MetricDataQueries = [];
   metrics.forEach((metric, i) => {
+    let Dimensions = undefined
+    if(metric.dimensions){
+      Dimensions = metric.dimensions.map(d => { return { Name: d.name, Value: d.value }})
+    }
     metricQuery.push({
       Id: `m${i}`,
       MetricStat: {
@@ -95,7 +112,7 @@ export function constructGetMetricsQuery(period, metrics): CloudWatch.MetricData
           MetricName: metric.metricName,
           Namespace: metric.nameSpace,
 
-          Dimensions: metric.dimension.map(d => { return { Name: d.name, Value: d.value }})
+          Dimensions
         },
         Period: period,
         Stat: 'Average',
