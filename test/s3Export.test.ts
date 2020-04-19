@@ -72,13 +72,12 @@ describe('dynamoStream', () => {
     const itemWithDimension = { "metricName": "NetworkOut", "nameSpace": "AWS/EC2", "dimensions": [{ "name": "AutoScalingGroupName", value: "my-asg-A" }] }
     const itemWithMultipleDimension = {
       "metricName": "CallCount", "nameSpace": "AWS/Usage", "dimensions": [
-        { "name": "Type", "value": "AP" },
+        { "name": "Type", "value": "API" },
         { "name": "Resource", "value": "GetMetricData" },
         { "name": "Service", "value": "CloudWatch" },
         { "name": "Class", "value": "None" }
       ]
     }
-
 
     it('should construct a MetricDataQueries object', () => {
       const metricFilters = [item]
@@ -93,7 +92,7 @@ describe('dynamoStream', () => {
     const itemWithMultipleDimensionMetric = {
       "MetricName": "CallCount", "Namespace": "AWS/Usage",
       Dimensions: [
-        { "Name": "Type", "Value": "AP" },
+        { "Name": "Type", "Value": "API" },
         { "Name": "Resource", "Value": "GetMetricData" },
         { "Name": "Service", "Value": "CloudWatch" },
         { "Name": "Class", "Value": "None" }
