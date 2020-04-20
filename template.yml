@@ -12,12 +12,11 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['metrics', 's3', 'export', 'mechanicalrock']
     HomePageUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
-    SemanticVersion: 1.0.10
     SourceCodeUrl: https://github.com/MechanicalRock/aws-metrics-s3-export
 
 Parameters:
   PermissionsBoundary:
-    Description: 'An optional permissions boundary to apply to all roles'
+    Description: '(optional) ARN of a permissions boundary to apply to all roles'
     Type: String
     ConstraintDescription: Must match a valid ARN of an IAM policy for the permission boundary
     AllowedPattern: "^$|arn:aws:iam::\\d{12}:policy/[a-zA-Z\\-]+$"
