@@ -8,7 +8,7 @@ Serverless application repository to allow cloudwatch metrics export to s3
 | PermissionsBoundary | (optional) ARN of a permissions boundary to apply to all roles  |
 | MetricFilter        | JSON string array of metric filters to apply (see below)        |
 | ExportBucketName    | BucketName where the metrics result will be exported to         |
-| MetricsExportPriod  | Metrics export priod, WEEKLY, FORTNIGHTLY, MONTHLY              |
+| MetricsExportPeriod  | Metrics export period, WEEKLY, FORTNIGHTLY, MONTHLY              |
 
 ## Getting Started
 
