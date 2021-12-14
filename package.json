@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/MechanicalRock/aws-metrics-s3-export",
   "dependencies": {
-    "aws-sdk": "^2.463.0",
+    "aws-sdk": "^2.1035.0",
     "moment": "^2.24.0"
   },
   "devDependencies": {
