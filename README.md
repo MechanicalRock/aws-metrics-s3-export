@@ -1,4 +1,7 @@
 # aws-metrics-s3-export
+
+**NOTE**: This repository is not maintained.  Use for reference purposes only.
+
 Serverless application repository to allow cloudwatch metrics export to s3
 
 ## Parameters
